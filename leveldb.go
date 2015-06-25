@@ -6,12 +6,12 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-type DbServer struct {
+type leveldbServer struct {
 	db *leveldb.DB
 }
 
-func NewDbServer(dbname string) (s *DbServer, err error) {
-	s = new(DbServer)
+func NewLevelDbServer(dbname string) (s *leveldbServer, err error) {
+	s = new(leveldbServer)
 	s.db, err = leveldb.OpenFile(dbname, nil)
 	if err != nil {
 		return
@@ -19,14 +19,14 @@ func NewDbServer(dbname string) (s *DbServer, err error) {
 	return
 }
 
-func (s *DbServer) Close() {
+func (s *leveldbServer) Close() {
 	if s != nil && s.db != nil {
 		s.db.Close()
 		s.db = nil
 	}
 }
 
-func (s *DbServer) serve(tr Transporter) error {
+func (s *leveldbServer) serve(tr Transporter) error {
 	if s == nil || s.db == nil {
 		return errors.New("ldbserver.Server.Serve: uninitialized server, please use ldbserver.NewServer to create server")
 	}

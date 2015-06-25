@@ -37,7 +37,7 @@ func (serv *NetworkServer) Stop() {
 	close(serv.stop)
 }
 
-func (serv *NetworkServer) ListenAndServe(db *DbServer, mt MarshalingType) error {
+func (serv *NetworkServer) ListenAndServe(db DBServer, mt MarshalingType) error {
 	var network string
 	if serv.netName == "http" {
 		network = "tcp"

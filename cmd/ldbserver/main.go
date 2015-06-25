@@ -76,7 +76,7 @@ func main() {
 
 	logger.Info("---START---")
 
-	db, err := ldbserver.NewDbServer(config.Db)
+	db, err := ldbserver.NewLevelDbServer(config.Db)
 	if err != nil {
 		logger.FatalErr(err)
 	}

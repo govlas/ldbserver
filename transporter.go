@@ -13,6 +13,11 @@ import (
 
 //go:generate protoc --gogo_out=. -I.:$GOPATH/src:/usr/local/include transport.proto
 
+type DBServer interface {
+	serve(Transporter) error
+	Close()
+}
+
 type Transporter interface {
 	GetRequest() (*TransportRequest, error)
 	SendResponse(*TransportResponse) error
