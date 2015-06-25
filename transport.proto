@@ -1,0 +1,48 @@
+package ldbserver;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.gostring_all) = true;
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+option (gogoproto.testgen_all) = true;
+option (gogoproto.benchgen_all) = true;
+option (gogoproto.populate_all) = true;
+
+option (gogoproto.equal_all) = true;
+option (gogoproto.verbose_equal_all) = true;
+
+
+message TransportBody{
+    required uint32 checksum = 1;
+    optional bytes data = 2;
+}
+
+message TransportRequest {
+    enum Command{
+        UNKNOWN = 0;
+        GET = 1;
+		PUT = 2;
+		DELETE = 3;
+    }
+	required bytes id = 1;
+    required Command command = 2;
+    optional TransportBody body = 3;
+
+}
+
+message TransportResponse {
+    enum Status {
+        UNKNOWN = 0;
+        OK = 1;
+		FAIL = 2;
+    }
+	required bytes id = 1;
+    required Status status = 2;
+    optional TransportBody body = 3;
+}
+
+
