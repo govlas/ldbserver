@@ -60,19 +60,23 @@ func (cl *Client) doRequest(req *ldbserver.TransportRequest) (resp *ldbserver.Tr
 	}
 
 	if w != nil {
+		var content_type string
 		switch cl.marshaling {
 		case ldbserver.MarshalingTypeJson:
 			enc := json.NewEncoder(w)
 			err = enc.Encode(req)
+			content_type = "application/json"
 		case ldbserver.MarshalingTypeProtobuf:
 			enc := pio.NewUint32DelimitedWriter(w, binary.LittleEndian)
 			err = enc.WriteMsg(req)
+			content_type = "application/octet-stream"
 		}
 		if err != nil {
 			return
 		}
 		if cl.network == "http" {
-			hresp, err := http.Post("http://"+cl.host, "", w.(io.Reader))
+
+			hresp, err := http.Post("http://"+cl.host, content_type, w.(io.Reader))
 			if err != nil {
 				return nil, err
 			}
