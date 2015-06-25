@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -24,13 +25,21 @@ func main() {
 		arg_net := flag.String("net", "unix", "network type (http,tcp,unix)")
 		arg_host := flag.String("host", "/tmp/ldbserver.sock", "network host")
 		arg_form := flag.String("form", "json", "format of marshaling (json,protobuf)")
-		arg_usage := flag.Bool("h", false, "print usage")
+		arg_usage := flag.Bool("usage", false, "print usage")
 		arg_config := flag.String("config", "", "json config (skips other flags)")
+
+		flag.Usage = func() {
+			fmt.Fprintln(os.Stderr, "ldbserver usage:")
+			flag.CommandLine.VisitAll(func(flag *flag.Flag) {
+				fmt.Fprintf(os.Stderr, "\t--%s: %s. Default: \"%s\"\n", flag.Name, flag.Usage, flag.DefValue)
+			})
+
+		}
 
 		flag.Parse()
 
 		if *arg_usage {
-			flag.PrintDefaults()
+			flag.Usage()
 			return
 		}
 
@@ -53,7 +62,7 @@ func main() {
 	}
 
 	if len(config.Db) == 0 {
-		logger.Fatal("-db must be a valid path")
+		logger.Fatal("--db must be a valid path")
 	}
 
 	switch config.Format {
@@ -62,7 +71,7 @@ func main() {
 	case "protobuf":
 		mf = ldbserver.MarshalingTypeProtobuf
 	default:
-		logger.Fatal("-form must be 'json' or 'protobuf'")
+		logger.Fatal("--form must be 'json' or 'protobuf'")
 	}
 
 	logger.Info("---START---")
