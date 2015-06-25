@@ -1,7 +1,9 @@
 package ldbserver
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"net"
 	"net/http"
 
@@ -71,7 +73,9 @@ func (serv *NetworkServer) ListenAndServe(db *DbServer, mt MarshalingType) error
 				for {
 					err := db.serve(tr)
 					if err != nil {
-						logger.Warning("warning on read/write stream socket: %v", err)
+						if err != io.EOF {
+							logger.Warning("warning on read/write stream socket: %v", err)
+						}
 						break
 					}
 				}
@@ -79,13 +83,15 @@ func (serv *NetworkServer) ListenAndServe(db *DbServer, mt MarshalingType) error
 		}
 	case "http":
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			tr := newRwTransporter(r.Body, w, mt)
+			buf := bytes.NewBuffer(nil)
+			tr := newRwTransporter(r.Body, buf, mt)
 			err := db.serve(tr)
 
 			if err != nil {
 				logger.Warning("warning on read/write http: %v", err)
 				w.WriteHeader(http.StatusInternalServerError)
+			} else {
+				w.Write(buf.Bytes())
 			}
 
 		})
