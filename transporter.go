@@ -50,15 +50,23 @@ func (rw *rwTransporter) GetRequest() (req *TransportRequest, err error) {
 	case MarshalingTypeJson:
 		dec := json.NewDecoder(rw.req)
 		err = dec.Decode(req)
-		return
+
 	case MarshalingTypeProtobuf:
 		dec := pio.NewUint32DelimitedReader(rw.req, binary.LittleEndian, 1024*1024)
 		err = dec.ReadMsg(req)
-		return
 	}
-	return nil, errors.New("unsupported marshaling type")
+	if err == nil {
+		if !CheckBody(req.Body) {
+			err = errors.New("bad checksum in request body")
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 func (rw *rwTransporter) SendResponse(resp *TransportResponse) error {
+	SetBodyChecksum(resp.Body)
 	switch rw.mt {
 	case MarshalingTypeJson:
 		enc := json.NewEncoder(rw.resp)

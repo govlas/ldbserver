@@ -77,7 +77,6 @@ func (s *leveldbServer) serve(tr Transporter) error {
 		}
 		resp.Id = append([]byte(nil), reqId...)
 	}
-	SetBodyChecksum(resp.Body)
 	if err := tr.SendResponse(resp); err != nil {
 		return err
 	}
