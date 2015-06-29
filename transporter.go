@@ -23,6 +23,10 @@ type Transporter interface {
 	SendResponse(*TransportResponse) error
 }
 
+type TransporterFactory interface {
+	NewTransporter(r io.Reader, w io.Writer) Transporter
+}
+
 type MarshalingType int
 
 const (
@@ -30,19 +34,29 @@ const (
 	MarshalingTypeProtobuf
 )
 
+type JsonProtobufTransportFactory struct{ Mt MarshalingType }
+
+func (f JsonProtobufTransportFactory) NewTransporter(r io.Reader, w io.Writer) Transporter {
+	ret := new(rwTransporter)
+	ret.mt = f.Mt
+	ret.req = r
+	ret.resp = w
+	return ret
+}
+
 type rwTransporter struct {
 	mt   MarshalingType
 	req  io.Reader
 	resp io.Writer
 }
 
-func newRwTransporter(r io.Reader, w io.Writer, mt MarshalingType) *rwTransporter {
-	ret := new(rwTransporter)
-	ret.mt = mt
-	ret.req = r
-	ret.resp = w
-	return ret
-}
+//func newRwTransporter(r io.Reader, w io.Writer, mt MarshalingType) *rwTransporter {
+//	ret := new(rwTransporter)
+//	ret.mt = mt
+//	ret.req = r
+//	ret.resp = w
+//	return ret
+//}
 
 func (rw *rwTransporter) GetRequest() (req *TransportRequest, err error) {
 	req = &TransportRequest{}

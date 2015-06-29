@@ -19,7 +19,7 @@ func serveCommand(t *testing.T, db DBServer, command TransportRequest_Command, k
 		out = bytes.NewBuffer(nil)
 		in  = bytes.NewBuffer(nil)
 
-		tr = newRwTransporter(out, in, mt)
+		tr = JsonProtobufTransportFactory{mt}.NewTransporter(out, in)
 	)
 
 	req := &TransportRequest{

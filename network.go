@@ -37,7 +37,7 @@ func (serv *NetworkServer) Stop() {
 	close(serv.stop)
 }
 
-func (serv *NetworkServer) ListenAndServe(db DBServer, mt MarshalingType) error {
+func (serv *NetworkServer) ListenAndServe(db DBServer, tf TransporterFactory) error {
 	var network string
 	if serv.netName == "http" {
 		network = "tcp"
@@ -69,7 +69,7 @@ func (serv *NetworkServer) ListenAndServe(db DBServer, mt MarshalingType) error 
 
 			go func(conn net.Conn) {
 				defer conn.Close()
-				tr := newRwTransporter(conn, conn, mt)
+				tr := tf.NewTransporter(conn, conn)
 				for {
 					err := db.serve(tr)
 					if err != nil {
@@ -84,7 +84,7 @@ func (serv *NetworkServer) ListenAndServe(db DBServer, mt MarshalingType) error 
 	case "http":
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			buf := bytes.NewBuffer(nil)
-			tr := newRwTransporter(r.Body, buf, mt)
+			tr := tf.NewTransporter(r.Body, buf)
 			err := db.serve(tr)
 
 			if err != nil {

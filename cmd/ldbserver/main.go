@@ -91,7 +91,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := ns.ListenAndServe(db, mf)
+		err := ns.ListenAndServe(db, ldbserver.JsonProtobufTransportFactory{mf})
 		if err != nil && err != ldbserver.ErrStopped {
 			logger.WarningErr(err)
 		}
